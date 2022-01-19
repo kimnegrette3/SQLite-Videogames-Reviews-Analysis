@@ -8,3 +8,4 @@ conexion = ddbb.sql_connection('ddbb/videojuegos.db')
 #ddbb.buscar_redsocial(conexion, "Amazon.com")
 #ddbb.insertar_redsocial_bbdd(conexion, "Facebook", "www.facebook.com")
 #meta.cargar_videojuegos()
+# prueba a ver si funciona el github
