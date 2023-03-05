@@ -1,5 +1,5 @@
 import sqlite3
-from sqlite3 import Error
+from sqlite3 import Error, IntegrityError
 
 def sql_connection(db_file):
     """ Crea una conexión a una Base de Datos SQLite Local
@@ -9,17 +9,17 @@ def sql_connection(db_file):
     conn = None
     try:
         conn = sqlite3.connect(db_file)
-        print(sqlite3.version)
+        print(f'SQlite version: {sqlite3.version}')
     except Error as e:
         print(e)
         if conn:
             conn.close()
     return conn
 
-#Method to find a social network in the table red social, check if it exists and return the id
+
 def buscar_redsocial(conexion, nom_redsocial):
     """
-    Retorna el id de la red Social
+    Retorna el id de la red Social si existe en la base de datos
     :param conn: Conexión a la base de datos SQLite
     :param nom_redsocial: Nombre de la red social
     :return: el id de la red social o None si esta no existe
@@ -37,34 +37,36 @@ def buscar_redsocial(conexion, nom_redsocial):
         print(e)
         return None
 
-#Method to insert a new row in the table red social if it does not exist
+
 def insertar_redsocial(conexion, nom_redsocial, url_redsocial):
     """
-    Inserta una nueva red social
+    Inserta una nueva red social en la base de datos si no existe
     :param conn: Conexión a la base de datos SQLite
     :param nom_redsocial, url_redsocial: nombre y url de la red social
     :return: project id
     """
-    id_red_social = buscar_redsocial(conexion, nom_redsocial)
-    print("red social", id_red_social)
-    if id_red_social is None:
-        query = "INSERT INTO RED_SOCIAL (id_red_social, nom_red_social, url_red_social) VALUES (?, ?, ?)"
-        datos = (id_red_social, nom_redsocial, url_redsocial)
-        insertar = conexion.cursor()
-        insertar.execute(query, datos)
-        conexion.commit()
-        id_red_social = insertar.lastrowid
-        print(f'Red social {nom_redsocial} insertada con id {id_red_social}')
-        return id_red_social
-    else:
-        print("La red Social ya existe con el id {}".format(id_red_social))
+    try:
+        id_red_social = buscar_redsocial(conexion, nom_redsocial)
+        if id_red_social is None:
+            query = "INSERT INTO RED_SOCIAL (id_red_social, nom_red_social, url_red_social) VALUES (?, ?, ?)"
+            datos = (id_red_social, nom_redsocial, url_redsocial)
+            insertar = conexion.cursor()
+            insertar.execute(query, datos)
+            conexion.commit()
+            id_red_social = insertar.lastrowid
+            print(f'Red social {nom_redsocial} insertada con id {id_red_social}')
+            return id_red_social
+        else:
+            print("La red Social ya existe con el id {}".format(id_red_social))
+            return None
+    except Error as e:
+        print('Error al insertar la red social:')
+        print(e)
         return None
 
-
-#Create a method to find a game in the table juegos, check if it exists and return the id
 def buscar_juego(conexion, tit_juego):
     """
-    Retorna el id del juego
+    Retorna el id del juego si existe en la base de datos
     :param conn: Conexión a la base de datos SQLite
     :param tit_juego: Nombe del juego
     :return: el id del juego o None si este no existe
@@ -82,34 +84,37 @@ def buscar_juego(conexion, tit_juego):
         print(e)
         return None
 
-#Create a method to insert a new row in the table juegos if it does not exist
+
 def insertar_juego(conexion, tit_juego, plataforma, f_publicacion):
     """
-    Inserta un nuevo juego
+    Inserta un nuevo juego en la base de datos si no existe
     :param conn: Conexión a la base de datos SQLite
     :param tit_juego: Titulo del juego
     :param plataforma: Plataforma del juego
     :param f_publicacion: Fecha de publicación del juego
     :return: project id"""
-    id_juego = buscar_juego(conexion, tit_juego)
-    if id_juego is None:   
-        query = "INSERT INTO JUEGOS (tit_juego, plataforma, f_publicacion) VALUES (?, ?, ?)"
-        datos = (tit_juego, plataforma, f_publicacion)
-        insertar = conexion.cursor()
-        insertar.execute(query, datos)
-        conexion.commit()
-        id_juego = insertar.lastrowid
-        print(f'Juego {tit_juego} insertado con id {id_juego}')
-        return id_juego
-    else:
-        print("El juego ya existe con el id {}".format(id_juego))
+    try:
+        id_juego = buscar_juego(conexion, tit_juego)
+        if id_juego is None:   
+            query = "INSERT OR IGNORE INTO JUEGOS (tit_juego, plataforma, f_publicacion) VALUES (?, ?, ?)"
+            datos = (tit_juego, plataforma, f_publicacion)
+            insertar = conexion.cursor()
+            insertar.execute(query, datos)
+            conexion.commit()
+            id_juego = insertar.lastrowid
+            print(f'Juego {tit_juego} insertado con id {id_juego}')
+            return id_juego
+        else:
+            print("El juego ya existe con el id {}".format(id_juego))
+            return None
+    except Error as e:
+        print('Error al insertar el juego:')
+        print(e)
         return None
 
-
-#Create a method to find a user in the table usuario, check if it exists and return the id
 def buscar_usuario(conexion, nick_usuario):
     """
-    Retorna el id del usuario
+    Retorna el id del usuario si existe en la base de datos
     :param conn: Conexión a la base de datos SQLite
     :param nom_usuario: Username
     :return: el id del usuario o None si este no existe
@@ -127,46 +132,52 @@ def buscar_usuario(conexion, nick_usuario):
         print(e)
         return None
 
-#Create a method to insert a new row in the table usuario if it does not exist
-#argument email_usuario is optional
+
 def insertar_usuario(conexion, nick_usuario, nom_usuario="no name", email_usuario="no email"):
     """
-    Inserta un nuevo usuario
+    Inserta un nuevo usuario en la base de datos si no existe
     :param conn: Conexión a la base de datos SQLite
     :param nick_usuario, nom_usuario, email_usuario: Username, nombre y email del usuario
     :return: project id
     """
-    id_usuario = buscar_usuario(conexion, nick_usuario)
-    if id_usuario is None:
-        query = "INSERT INTO USUARIO (nick_usuario, nom_usuario, email_usuario) VALUES (?, ?, ?)"
-        datos = (nick_usuario, nom_usuario, email_usuario)
-        insertar = conexion.cursor()
-        insertar.execute(query, datos)
-        conexion.commit()
-        id_usuario = insertar.lastrowid
-        #print(f'Usuario {nick_usuario} creado con id {id_usuario}')
-        return id_usuario
-    else:
-        print("El usuario ya existe con el id {}".format(id_usuario))
+    try: 
+        id_usuario = buscar_usuario(conexion, nick_usuario)
+        if id_usuario is None:
+            query = "INSERT INTO USUARIO (nick_usuario, nom_usuario, email_usuario) VALUES (?, ?, ?)"
+            datos = (nick_usuario, nom_usuario, email_usuario)
+            insertar = conexion.cursor()
+            insertar.execute(query, datos)
+            conexion.commit()
+            id_usuario = insertar.lastrowid
+            return id_usuario
+        else:
+            print("El usuario ya existe con el id {}".format(id_usuario))
+            return None
+    except Error as e:
+        print('Error al insertar el usuario:')
+        print(e)
         return None
 
-#create a method to insert a message in the table mensaje 
-#table mensaje has no id_mensaje, it is autoincremental
 def insertar_mensaje(conexion, f_mensaje, text_mensaje, id_juego, id_usuario, id_red_social):
     """
-    Inserta un nuevo mensaje
+    Inserta un nuevo mensaje en la base de datos
     :param conn: Conexión a la base de datos SQLite
     :param f_mensaje, text_mensaje, id_juego, id_usuario, id_red_social: Fecha del mensaje, texto del mensaje, id del juego, id del usuario y id de la red social
     :return: project id
     """
     try:
-        query = "INSERT INTO MENSAJE (f_mensaje, text_mensaje, id_juego, id_usuario, id_red_social) VALUES (?, ?, ?, ?, ?)"
+        query = "INSERT OR IGNORE INTO MENSAJE (f_mensaje, text_mensaje, id_juego, id_usuario, id_red_social) VALUES (?, ?, ?, ?, ?)"
         datos = (f_mensaje, text_mensaje, id_juego, id_usuario, id_red_social)
         insertar = conexion.cursor()
         insertar.execute(query, datos)
         conexion.commit()
         return insertar.lastrowid
+    except IntegrityError:
+        print('Warning: Este registro ya existe, no se insertará en la base de datos')
+        return None
     except Error as e:
+        print('Error al insertar el mensaje:')
         print(e)
         return None
+    
 
