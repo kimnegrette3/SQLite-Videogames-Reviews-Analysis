@@ -1,38 +1,35 @@
 import json
 from datetime import date
+from sqlite3 import Error
+from dateutil import parser
 from cargar_datos import cargar_datos_ddbb as db
-
-    #Escoger solo algunos, porque son muchisimos.
-    #La misma idea, si el usuario no está, se inserta, si el videojuego no está, se inserta
-    #Se arma la sentencia sql y se inserta el comentario
 
 #Create a method to process the json file and extract the messages
 def procesar_mensajes(conexion, file, tit_juego):
     """
-    Procesa el archivo json y extrae los mensajes
-    :param conn: Conexión a la base de datos SQLite
-    :param file: Archivo json
-    :param tit_juego: Titulo del juego
-    :return:
+    Procesa un archivo json, extrae los mensajes y 
+    los inserta en la base de datos.
+    :param conexion: Conexión a la base de datos SQLite
+    :param file: Archivo json con los mensajes
+    :param tit_juego: Titulo del juego a procesar
     """
     with open(file) as json_file:
         json_data = json.load(json_file)
-    print(json_data.keys())
     for juego in json_data.keys():
-        #print(juego)
-        #If the game is in the json file, then process it
+        #if the game is in the json file, then process it
         if juego == tit_juego:
             #look for the id_user in the database
             id_juego = db.buscar_juego(conexion, tit_juego)
             #if not found, insert it
             if id_juego is None:
-                f_publicacion = json_data[juego]['appInfo']['released']
+                fecha = json_data[juego]['appInfo']['released']
+                fecha = parser.parse(fecha)
+                f_publicacion = fecha.date().year
                 id_juego = db.insertar_juego(conexion, tit_juego, "Android", f_publicacion)
             #look for the red_social in the database
             id_red_social = db.buscar_redsocial(conexion, "PlayStoreGame.com")
-            #print(juego)
-            #Extract a limited nomber of messages and its attributes
-            for i in range(5):
+            #extract messages and its attributes
+            for i in range(len(json_data[juego]['reviews'])):
                 #get the user name
                 n_usuario = (json_data[juego]['reviews'][i]['userName'])
                 #check if the user is in the database
@@ -45,12 +42,13 @@ def procesar_mensajes(conexion, file, tit_juego):
                 #get the message date, which is today
                 f_mensaje = date.today()
                 #insert the message in the database
-                db.insertar_mensaje(conexion, id_usuario, id_juego, id_red_social, f_mensaje, text_mensaje)
-            #print the number of messages processed
-            print("Se procesaron " + str(i+1) + " mensajes")
-        #Else, print an error message
-        else:
-            print("El juego " + juego + " no está en el archivo")
+                db.insertar_mensaje(conexion, f_mensaje, text_mensaje,  id_juego, id_usuario, id_red_social)                        
+            #if db.insertar_mensaje works, print the number of inserted rows in the database
+            return f'Se insertaron {i+1} mensajes del juego "{tit_juego}" en la base de datos'
+    #if tit_juego is not ins the json.keys(), print a warning message
+    if tit_juego not in json_data.keys():
+            print("El juego " + tit_juego + " no está en el archivo json")
+
             
 
 
