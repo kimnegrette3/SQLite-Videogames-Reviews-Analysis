@@ -21,7 +21,7 @@ def consultar_comentarios_fecha(conexion, palabra, fecha1, fecha2):
     df = pd.read_sql_query(query, conexion)
     #print only the nick_usuario and the count of messages
     print(f'Los usuarios que han escrito un mensaje con la palabra "{palabra}" entre las fechas {fecha1} y {fecha2} son:')
-    return df.style.hide_index()
+    return df.style
 
 
 def consultar_comentarios_usuario(conexion):
@@ -35,7 +35,7 @@ def consultar_comentarios_usuario(conexion):
                 ORDER BY cantidad DESC'''
     df = pd.read_sql_query(query, conexion)
     print('La cantidad de mensajes por usuario son:')
-    return df.style.hide_index()
+    return df.style
 
 
 def consultar_comentarios_red_social_fecha(conexion, fecha1, fecha2):
