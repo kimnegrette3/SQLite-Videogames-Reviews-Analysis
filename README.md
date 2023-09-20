@@ -54,3 +54,6 @@ Las consultas que se pueden realizar desde la base de datos a través de jupyter
   <img src="imagenes/bars.jpeg" width="320" height="280" />
   <img src="imagenes/boxplots.jpeg" width="320" height="280"/> 
 </p>
+
+## Conclusiones:
+En "Videogames Reviews Analysis", fortalecí habilidades esenciales en análisis e ingeniería de datos al gestionar comentarios de jugadores de diversas redes sociales. Usando Python, integré bibliotecas como Pandas y BeautifulSoup para procesar datos de forma eficiente. La adopción de SQLite3 permitió un almacenamiento y consulta de datos ágil, resaltando mi capacidad para combinar diversas tecnologías en análisis de datos. Este proyecto subraya mi capacidad para realizar tareas como Data Engineer o Data Analyst, enfatizando la integración de herramientas y adaptabilidad.
