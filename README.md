@@ -11,6 +11,9 @@
 
 El proyecto tiene como objetivo principal la creación de una aplicación sencilla que permita gestionar los mensajes obtenidos de diversos videojuegos en diferentes redes sociales. Esta aplicación se desarrolla a solicitud de una empresa de videojuegos y se utiliza para consolidar y analizar comentarios y feedback de jugadores.
 
+## Datos
+Los ficheros originales de los reviews provienen de Metacritic y de PlayStore, disponibles en formatos csv y json en el siguiente [link](https://drive.google.com/drive/folders/17E25j2Rrva2KN4R1MT2lFCdGoATha899?usp=sharing)
+
 ## Herramientas y Tecnologías
 
 - **Python:** Para la extracción transformación y carga de datos de distintas fuentes y la creación de módulos diferenciados para el orden dentro de la aplicación
